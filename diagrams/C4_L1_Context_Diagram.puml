@@ -1,0 +1,13 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Context.puml
+
+title System Context Diagram for Clothing Store Application
+Person(employee, "Employee", "Clothing Store Administrator")
+Person(customer, "Customer", "Customers that are purchasing/browsing")
+System(clothingstoreapp, "Clothing Store System", "Allows the Grocery Store Administrator to properly manage customers, products, new employees, and orders")
+
+Rel(employee, clothingstoreapp, "Track and modify product price, customer files and employees", "Uses")
+Rel(customer, clothingstoreapp, "Browse products and order", "Uses")
+
+'SHOW_LEGEND()
+@enduml

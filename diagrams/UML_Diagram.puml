@@ -1,0 +1,206 @@
+@startuml
+hide circle
+top to bottom direction
+
+!define ENTITY(entityName) class entityName << Entity >>
+!define AGGREGATE(aggregateName) class aggregateName << Aggregate >>
+!define AGGREGATE_ROOT(aggregateRootName) class aggregateRootName << Aggregate Root >>
+!define AGGREGATE_ROOT_ENTITY(aggregateRootEntityName) class aggregateRootEntityName << Aggregate Root >> << Entity >>
+!define VALUE_OBJECT(valueObjectName) class valueObjectName << Value Object >>
+!pragma useVerticalIf on
+skinparam packageStyle rectangle
+skinparam rectangle {
+    BackgroundColor #f7f4eb
+    BorderColor Black
+}
+rectangle "Clothing Store Application" as BoundedContextWedding #line.dashed {
+    package "Employee Subdomain" <<Rectangle>> #247BA0 {
+
+        package "Entities" {
+            class Employee {
+                + lastName: String
+                + firstName: String
+                + jobTitle: String
+                + department: String
+                + salary: Salary
+            }
+        }
+        package "Value Objects" {
+
+
+            class Price #808080 {
+                value : Double
+                currency : Currency
+            }
+
+            enum Currency #808080 {
+                USD
+                EUR
+                GBP
+                JPY
+                AUD
+                CAD
+            }
+
+            class Salary #808080 {
+                + salaryPrice: Double
+                + hourly: Time
+                + paymentMethod : PaymentMethod
+                + PaymentInterval: String
+                + Currency: Currency
+            }
+            class PaymentMethod << Enumerator >> #808080{
+                + Cash
+                + Credit
+                + Debit
+            }
+
+            class EmployeeIdentifier{
+                employeeId : UUID
+            }
+            Employee o--"1" EmployeeIdentifier
+            Employee "1"--"1" Salary
+            Price --> Currency
+            Salary --> Price
+            Salary --> PaymentMethod
+        }
+
+    }
+
+    package "Customer Subdomain" <<Rectangle>> #70C1B3 {
+        package "Entities" {
+            class Client {
+                + lastName: String
+                + firstName: String
+                + contactInfo: Contact
+            }
+        }
+        package "Value Objects" {
+            class Address {
+                + street: String
+                + city: String
+                + postalCode: String
+                + province: String
+            }
+            class Contact #808080 {
+                + email: String
+                + phone: String
+            }
+
+            class ClientIdentifier {
+                + clientId: UUID
+            }
+
+            Client o--"1" Address
+        }
+        Client --> "1" Contact
+        Client --> "1" ClientIdentifier
+    }
+    package "Order Subdomain" <<Rectangle>> #FF1654 {
+        note "INVARIANT : Every time a new order is created\n or updated, the provided productId will have its\n respective product's quantity subtracted by one.\n A new order can only be created if the product\n is stock. This also changes the availability\n status of the product once the quantity reaches 0. " as explanation
+
+        package "Aggregate" {
+            AGGREGATE_ROOT_ENTITY(Order){
+                + productName: String
+                + productPrice: Price
+                + employeeLastName: Date
+                + shippingPrice: Price
+                + finalPrice: Price
+            }
+        }
+        package "Value Objects" {
+
+            class Address {
+                + street: String
+                + city: String
+                + state: String
+                + postalCode: String
+                + country: String
+            }
+
+            class ShippingStatus << Enumerator >>{
+                + PENDING
+                + IN_TRANSIT
+                + DELIVERED
+                + CANCELED
+            }
+
+            class Price #808080{
+                + value : Double
+                + currency : Currency
+            }
+
+            class OrderIdentifier{
+                + orderId : UUID
+            }
+
+            enum Currency #808080{
+                USD
+                EUR
+                GBP
+                JPY
+                AUD
+                CAD
+            }
+            Price --> Currency
+            Order o--"1" Price
+            Order o--"1" OrderIdentifier
+            Order o--"1" Address
+            Order o--"1" ShippingStatus
+        }
+
+       Order o--"1" ClientIdentifier
+       Order o--"1" EmployeeIdentifier
+       Order o--"1" ProductIdentifier
+    }
+    package "Product Subdomain" <<Rectangle>> #B2DBBF {
+
+        package "Entities" {
+            class Product {
+                + name: String
+                + description: String
+                + size: String
+                + quantity: int
+            }
+        }
+        package "Value Objects" {
+            class ProductIdentifier {
+                + productID : UUID
+            }
+            class Image #808080 {
+                + url: String
+                + altText: String
+            }
+
+            class Price #808080{
+                + value : Double
+                + currency : Currency
+            }
+                class ProductStatus {
+                + IN_STOCK
+                + OUT_OF_STOCK
+            }
+
+            enum Currency #808080{
+                USD
+                EUR
+                GBP
+                JPY
+                AUD
+                CAD
+            }
+
+            Price --> Currency
+            Product o--"1" Price
+
+            Product o--"1" ProductIdentifier
+            Product --> ProductStatus
+
+        }
+        Product --> "0..*" Image
+    }
+            note "SOME NOTES: A common price value object ended up never being \nimplemented, but I kept it in my UML diagram and simply greyed it out.\n In its place is simply BigDecimal values with the corresponding variable.\n\nAlso, I have no idea why my order subdomain refuses to make a link to\nmy product identifier. Seems to be a bug of some kind." as explanation
+
+}
+
+@enduml

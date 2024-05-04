@@ -1,0 +1,52 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+
+!include FONTAWESOME/users.puml
+
+AddElementTag("microService", $shape=EightSidedShape(), $bgColor="CornflowerBlue", $fontColor="white", $legendText="micro service\neight sided")
+AddElementTag("unusedMicroService", $shape=EightSidedShape(), $bgColor="grey", $fontColor="white", $legendText="micro service\neight sided")
+AddElementTag("storage", $shape=RoundedBoxShape(), $bgColor="lightSkyBlue", $fontColor="white")
+AddElementTag("unusedStorage", $shape=RoundedBoxShape(), $bgColor="grey", $fontColor="white")
+AddRelTag(aggregate_root, $lineColor="red")
+
+LAYOUT_TOP_DOWN()
+'LAYOUT_WITH_LEGEND()
+SHOW_PERSON_OUTLINE()
+'HIDE_STEREOTYPE()
+
+title Container Diagram for Clothing System
+
+Person(employee, "Employee", "Clothing Store Administrator")
+System_Boundary(clothingstore, "Clothing Store System") {
+Container(webapp, "Web Application", "JavaScript, React", "Show the information of the clothing store in single page application")
+    Container(singlepage_app, "Single-Page Application", "Javascript, React", "You can access the application through your browser as long as it supports later version javascript")
+    Container(api_gateway, "API-Gateway", "Java, Spring Boot", "Provides clothing store functionality via a JSON/REST HTTPS API.")
+    Container(orders_service, "orders_service", "Java, Spring Boot", "Provides order functionality using the aggregator pattern via a JSON/REST HTTPS API.", $tags = "microService")
+    Container(customer_service, "customer_service", "Java, Spring Boot", "Provides customer functionality via a JSON/REST HTTPS API.", $tags = "microService")
+    Container(employee_service, "employees_service", "Java, Spring Boot", "Provides employee functionality via a JSON/REST HTTPS API.", $tags = "microService")
+    Container(product_service, "product_service", "Java, Spring Boot", "Provides product functionality via a JSON/REST HTTPS API.", $tags = "microService")
+    Container(orders_db, "Orders DB", "MySQL 5.5.x", "Stores orders information.", $tags = "storage")
+    Container(customer_db, "Customer DB", "MySQL 5.5.x", "Stores customer information.", $tags = "storage")
+    Container(employee_db, "Employee DB", "MySQL 5.5.x", "Stores employee information.", $tags = "storage")
+    Container(product_db, "Product DB", "Postgres latest version", "Stores product information.", $tags = "storage")
+
+
+    Rel(employee, webapp, "Visits http://IPADDRESS:8080 using", "HTTP")
+    Rel_R(webapp, singlepage_app, "Show the page on the employee's browser")
+    Rel(employee, singlepage_app, "views tracks orders using", "HTTPS")
+    Rel(singlepage_app, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
+
+    Rel(api_gateway, orders_service, "Makes API calls to", "JSON/REST/HTTPS")
+    Rel(orders_service, customer_service, "Makes API calls to", "JSON/REST/HTTPS", $tags = "aggregate_root")
+    Rel(orders_service, employee_service, "Makes API calls to", "JSON/REST/HTTPS", $tags = "aggregate_root")
+    Rel(orders_service, product_service, "Makes API calls to", "JSON/REST/HTTPS", $tags = "aggregate_root")
+    Rel_D(customer_service, customer_db, "Reads from and writes to", "JDBC")
+    Rel_D(employee_service, employee_db, "Reads from and writes to", "JDBC")
+    Rel_D(product_service, product_db, "Reads from and writes to", "JDBC")
+    Rel_R(orders_service, orders_db, "Reads from and writes to", "JDBC", $tags = "aggregate_root")
+   }
+
+@enduml
