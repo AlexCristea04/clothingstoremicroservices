@@ -10,6 +10,7 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
+
 ---
 # for test
 
@@ -24,7 +25,7 @@ spring:
       enabled: true
 
   datasource:
-    url: jdbc:h2:mem:customers-db;DB_CLOSE_DELAY=-1;NON_KEYWORDS=YEAR
+    url: jdbc:h2:mem:orders-db;DB_CLOSE_DELAY=-1;NON_KEYWORDS=YEAR
     driver-class-name: org.h2.Driver
     username: sa
     password: pwd
@@ -57,7 +58,7 @@ spring:
 
 spring:
   datasource:
-    url: jdbc:mysql://mysql1/customers-db
+    url: jdbc:mysql://mysql4/orders-db
     username: user
     password: pwd
 
@@ -74,6 +75,17 @@ spring:
       platform: mysql
       mode: always
 
-server.port: 8081
+server.port: 8080
 
-spring.datasource.hikari.initializationFailTimeout: 60000
+#spring.datasource.hikari.initializationFailTimeout: 60000
+
+app:
+  customers-service:
+    host: customers-service
+    port: 8081
+  employees-service:
+    host: employees-service
+    port: 8082
+  products-service:
+    host: products-service
+    port: 8083

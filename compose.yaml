@@ -45,7 +45,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      mysql1:
+      mysql2:
         condition: service_healthy
 
 
@@ -84,7 +84,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      mysql1:
+      mysql3:
         condition: service_healthy
 
 
@@ -99,6 +99,44 @@ services:
       - MYSQL_PASSWORD=pwd
     volumes:
       - ./data/mysql1:/var/lib/mysql3
+      - ./data/init.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-uuser",
+          "-ppwd",
+          "-h",
+          "localhost",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  orders-service:
+    build: orders-service
+    hostname: orders-service
+    ports:
+      - "8084:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      mysql4:
+        condition: service_healthy
+
+  mysql4:
+    image: mysql:5.7
+    ports:
+      - "33010:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=orders-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - ./data/mysql1:/var/lib/mysql2
       - ./data/init.d:/docker-entrypoint-initdb.d
     healthcheck:
       test:
