@@ -1,9 +1,22 @@
 services:
+  api-gateway:
+    build: api-gateway
+    hostname: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - customers-service
+      - employees-service
+      - products-service
+      - orders-service
+
   customers-service:
     build: customers-service
     hostname: customers-service
-    ports:
-      - "8081:8080"
+    #ports:
+     # - "8081:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -40,8 +53,8 @@ services:
   employees-service:
     build: employees-service
     hostname: employees-service
-    ports:
-      - "8082:8080"
+    #ports:
+     # - "8082:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -79,8 +92,8 @@ services:
   products-service:
     build: products-service
     hostname: products-service
-    ports:
-      - "8083:8080"
+    #ports:
+     # - "8083:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -118,8 +131,8 @@ services:
   orders-service:
     build: orders-service
     hostname: orders-service
-    ports:
-      - "8084:8080"
+    #ports:
+     # - "8084:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:

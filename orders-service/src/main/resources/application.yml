@@ -82,10 +82,10 @@ server.port: 8080
 app:
   customers-service:
     host: customers-service
-    port: 8081
+    port: 8080
   employees-service:
     host: employees-service
-    port: 8082
+    port: 8080
   products-service:
     host: products-service
-    port: 8083
+    port: 8080

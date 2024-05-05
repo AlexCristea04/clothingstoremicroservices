@@ -10,6 +10,7 @@ import com.example.orders.presentationlayer.OrderRequestModel;
 import com.example.orders.presentationlayer.OrderResponseModel;
 import com.example.orders.utils.exceptions.InvalidInputException;
 import com.example.orders.utils.exceptions.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -58,8 +59,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponseModel addOrder(OrderRequestModel orderRequestModel) {
-        return null;
-        /*
+
         if(customerServiceClient.getCustomerByCustomerId(orderRequestModel.getCustomerId()) == null)
             throw new InvalidInputException("Invalid input for customerId " + orderRequestModel.getCustomerId());
 
@@ -70,20 +70,43 @@ public class OrderServiceImpl implements OrderService {
             throw new InvalidInputException("Invalid input for productId " + orderRequestModel.getProductId());
 
         Order order = orderRequestMapper.requestModelToEntity(orderRequestModel, new OrderIdentifier(),
-                customerServiceClient.getCustomerByCustomerId(orderRequestModel.getCustomerId()),
-                employeeServiceClient.getEmployeeByEmployeeId(orderRequestModel.getEmployeeId()),
-                productServiceClient.getProductByProductId(orderRequestModel.getProductId()));
-    */
+                new ProductIdentifier(orderRequestModel.getProductId()),
+                new CustomerIdentifier(orderRequestModel.getCustomerId()),
+                new EmployeeIdentifier(orderRequestModel.getEmployeeId()));
+
+        return orderResponseMapper.entityToResponseModel(orderRepository.save(order));
     }
 
     @Override
     public OrderResponseModel updateOrder(OrderRequestModel orderRequestModel, String orderId) {
-        return null;
+        if(!orderRepository.existsOrderByOrderIdentifier_OrderId(orderId))
+            throw new NotFoundException("Unknown wifeID " + orderId);
+        if(customerServiceClient.getCustomerByCustomerId(orderRequestModel.getCustomerId()) == null)
+            throw new InvalidInputException("Unknown customerId " + orderRequestModel.getOrderId());
+        if(employeeServiceClient.getEmployeeByEmployeeId(orderRequestModel.getEmployeeId()) == null)
+            throw new NotFoundException("Unknown employeeId " + orderRequestModel.getEmployeeId());
+        if(productServiceClient.getProductByProductId(orderRequestModel.getProductId()) == null)
+            throw new NotFoundException("Unknown productId " + orderRequestModel.getProductId());
+
+        Order order = orderRepository.findByOrderIdentifier_OrderId(orderId);
+
+        Order updateOrder = orderRequestMapper.requestModelToEntity(orderRequestModel, new OrderIdentifier(orderId),
+                new ProductIdentifier(orderRequestModel.getProductId()),
+                new CustomerIdentifier(orderRequestModel.getCustomerId()),
+                new EmployeeIdentifier(orderRequestModel.getEmployeeId()));
+
+        updateOrder.setId(order.getId());
+
+        return orderResponseMapper.entityToResponseModel(orderRepository.save(updateOrder));
     }
 
+    @Transactional
     @Override
     public void removeOrder(String orderId) {
+        if(!orderRepository.existsOrderByOrderIdentifier_OrderId(orderId))
+            throw new NotFoundException("Unknown orderId " + orderId );
 
+        orderRepository.deleteOrderByOrderIdentifier_OrderId(orderId);
     }
 
 }

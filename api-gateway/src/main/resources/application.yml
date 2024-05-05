@@ -1,0 +1,36 @@
+# Default Spring Profile
+server:
+  error:
+    include-message: always
+
+logging:
+  level:
+    root: INFO
+    com.example: DEBUG
+
+---
+
+# for docker
+
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+server.port: 8080
+
+#spring.datasource.hikari.initializationFailTimeout: 60000
+
+app:
+  customers-service:
+    host: customers-service
+    port: 8080
+  employees-service:
+    host: employees-service
+    port: 8080
+  products-service:
+    host: products-service
+    port: 8080
+  orders-service:
+    host: orders-service
+    port: 8080
