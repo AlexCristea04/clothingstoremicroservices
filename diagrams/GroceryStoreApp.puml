@@ -1,0 +1,257 @@
+@startuml
+hide circle
+top to bottom direction
+
+!define ENTITY(entityName) class entityName << Entity >>
+!define AGGREGATE(aggregateName) class aggregateName << Aggregate >>
+!define AGGREGATE_ROOT(aggregateRootName) class aggregateRootName << Aggregate Root >>
+!define AGGREGATE_ROOT_ENTITY(aggregateRootEntityName) class aggregateRootEntityName << Aggregate Root >> << Entity >>
+!define VALUE_OBJECT(valueObjectName) class valueObjectName << Value Object >>
+!pragma useVerticalIf on
+skinparam packageStyle rectangle
+skinparam rectangle {
+    BackgroundColor #f7f4eb
+    BorderColor Black
+}
+rectangle "Grocery Store Application" as BoundedContextWedding #line.dashed {
+    package "Employees Management Subdomain" <<Rectangle>> #3399FF {
+
+        package "Entities" {
+            class Employee {
+                + name: String
+                + age: Integer
+            }
+        }
+        package "Value Objects" {
+            class DaysNonAvailable {
+                + fullDay: Boolean
+                + startOfNonAvailability: Date
+                + endOfNonAvailability: Date
+                + reason: String
+                + weekDay: DaysOfTheWeek
+            }
+            class Date {
+                + day: Integer
+                + month: Integer
+                + year: Integer
+            }
+            enum DaysOfTheWeek {
+                Monday
+                Tuesday
+                Wednesday
+                Thursday
+                Friday
+                Saturday
+                Sunday
+            }
+            enum CurrentEmploymentStatus {
+                Employed
+                Fired
+                Suspended
+                InVacation
+            }
+            class Price {
+                value : Double
+                currency : Currency
+            }
+            enum Currency {
+                USD
+                EUR
+                GBP
+                JPY
+                AUD
+                CAD
+            }
+            class Salary {
+                + salaryPrice: Price
+                + paymentMethod : PaymentMethod
+
+            }
+            class PaymentMethod << Enumerator >>{
+                + Cash
+                + Credit
+                + Debit
+            }
+
+            class EmployeeIdentifier{
+                employeeId : UUID
+            }
+            Employee o--"1" EmployeeIdentifier
+
+            Price --> Currency
+            Salary --> Price
+            Salary --> PaymentMethod
+            DaysNonAvailable --> Date
+        }
+        Employee --> Salary
+        Employee --> CurrentEmploymentStatus
+        DaysNonAvailable --> DaysOfTheWeek
+        Employee o--"0..*" DaysNonAvailable
+    }
+    package "Clients Subdomain" <<Rectangle>> #66CC66 {
+        package "Entities" {
+            class Client {
+                + name: String
+                + contactInfo: Contact
+            }
+        }
+        package "Value Objects" {
+            class Address {
+                + street: String
+                + city: String
+                + state: String
+                + postalCode: String
+                + country: String
+            }
+            class Contact {
+                + email: String
+                + phone: String
+            }
+
+            class Membership {
+                + totalSpent: Double
+                + numberOfPoints: Integer
+            }
+            class ClientIdentifier {
+                + clientId: UUID
+            }
+            class MembershipStatus{
+                + Active
+                + Suspended
+                + Closed
+            }
+            class Price{
+                + value : Double
+                + currency : Currency
+            }
+            enum Currency {
+                USD
+                EUR
+                GBP
+                JPY
+                AUD
+                CAD
+            }
+            Price --> Currency
+            Membership o--"1" Price
+            Membership --> MembershipStatus
+            Client --> Membership
+            Client o--"1" Address
+        }
+        Client --> "1" Contact
+        Client --> "1" ClientIdentifier
+    }
+    package "Transaction Management Subsystem" <<Rectangle>> #FF9933 {
+        note "INVARIANT : On every purchase, update client point depending on total of purchases - ADD WHENEVER POST" as explanation
+
+        package "Aggregate" {
+            AGGREGATE_ROOT_ENTITY(PurchaseReceipt){
+                + amount: Double
+                + currentDate: CurrentDate
+            }
+        }
+        package "Value Objects" {
+            class Date {
+                + day: Integer
+                + month: Integer
+                + year: Integer
+            }
+            class StoreAddress {
+                + street: String
+                + city: String
+                + state: String
+                + postalCode: String
+                + country: String
+            }
+            class CurrentDate {
+                + transactionHour : Integer
+                + transactionDate : Date
+            }
+            class Price{
+                + value : Double
+                + currency : Currency
+            }
+            class PurchaseReceiptIdentifier{
+                + purchaseReceiptId : UUID
+            }
+            enum Currency {
+                USD
+                EUR
+                GBP
+                JPY
+                AUD
+                CAD
+            }
+            Price --> Currency
+            PurchaseReceipt o--"1" Price
+            PurchaseReceipt o--"1" PurchaseReceiptIdentifier
+            CurrentDate --> Date
+        }
+       PurchaseReceipt o--"1" StoreAddress
+
+       PurchaseReceipt o--"1" CurrentDate
+       PurchaseReceipt o--"1" ClientIdentifier
+       PurchaseReceipt o--"1" EmployeeIdentifier
+
+    }
+    package "Product Subdomain" <<Rectangle>> #ffff11 {
+
+        package "Entities" {
+            class Product {
+                + name: String
+                + description: String
+            }
+        }
+        package "Value Objects" {
+            class ProductIdentifier {
+                + productID : UUID
+            }
+            class Image {
+                + url: String
+                + altText: String
+            }
+            class CategoryArticle {
+                + categoryName: String
+                + categoryDescription: String
+            }
+            class Price{
+                + value : Double
+                + currency : Currency
+            }
+            class ProductAvailability {
+                + Available
+                + NonAvailable
+                + LastRemaining
+            }
+            class Date {
+                + day: Integer
+                + month: Integer
+                + year: Integer
+            }
+            class PalletImportedFrom{
+                + palletID : int
+                + manufacturer : String
+                + arrivalDate : Date
+            }
+            enum Currency {
+                USD
+                EUR
+                GBP
+                JPY
+                AUD
+                CAD
+            }
+            PalletImportedFrom --> Date
+            Price --> Currency
+            Product o--"1" Price
+            Product o--"1" PalletImportedFrom
+            Product o--"1" ProductIdentifier
+            Product --> ProductAvailability
+            PurchaseReceipt o--"1..*" ProductIdentifier
+        }
+        Product --> "0..*" Image
+        Product --> "0..*" CategoryArticle
+    }
+}
+
+@enduml

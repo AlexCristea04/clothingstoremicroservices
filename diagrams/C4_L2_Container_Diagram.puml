@@ -24,7 +24,7 @@ System_Boundary(clothingstore, "Clothing Store System") {
 Container(webapp, "Web Application", "JavaScript, React", "Show the information of the clothing store in single page application")
     Container(singlepage_app, "Single-Page Application", "Javascript, React", "You can access the application through your browser as long as it supports later version javascript")
     Container(api_gateway, "API-Gateway", "Java, Spring Boot", "Provides clothing store functionality via a JSON/REST HTTPS API.")
-    Container(orders_service, "orders_service", "Java, Spring Boot", "Provides order functionality using the aggregator pattern via a JSON/REST HTTPS API.", $tags = "microService")
+    Container(transaction_service, "transaction_service", "Java, Spring Boot", "Provides order functionality using the aggregator pattern via a JSON/REST HTTPS API.", $tags = "microService")
     Container(customer_service, "customer_service", "Java, Spring Boot", "Provides customer functionality via a JSON/REST HTTPS API.", $tags = "microService")
     Container(employee_service, "employees_service", "Java, Spring Boot", "Provides employee functionality via a JSON/REST HTTPS API.", $tags = "microService")
     Container(product_service, "product_service", "Java, Spring Boot", "Provides product functionality via a JSON/REST HTTPS API.", $tags = "microService")
@@ -39,14 +39,14 @@ Container(webapp, "Web Application", "JavaScript, React", "Show the information 
     Rel(employee, singlepage_app, "views tracks orders using", "HTTPS")
     Rel(singlepage_app, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 
-    Rel(api_gateway, orders_service, "Makes API calls to", "JSON/REST/HTTPS")
-    Rel(orders_service, customer_service, "Makes API calls to", "JSON/REST/HTTPS", $tags = "aggregate_root")
-    Rel(orders_service, employee_service, "Makes API calls to", "JSON/REST/HTTPS", $tags = "aggregate_root")
-    Rel(orders_service, product_service, "Makes API calls to", "JSON/REST/HTTPS", $tags = "aggregate_root")
+    Rel(api_gateway, transaction_service, "Makes API calls to", "JSON/REST/HTTPS")
+    Rel(transaction_service, customer_service, "Makes API calls to", "JSON/REST/HTTPS", $tags = "aggregate_root")
+    Rel(transaction_service, employee_service, "Makes API calls to", "JSON/REST/HTTPS", $tags = "aggregate_root")
+    Rel(transaction_service, product_service, "Makes API calls to", "JSON/REST/HTTPS", $tags = "aggregate_root")
     Rel_D(customer_service, customer_db, "Reads from and writes to", "JDBC")
     Rel_D(employee_service, employee_db, "Reads from and writes to", "JDBC")
     Rel_D(product_service, product_db, "Reads from and writes to", "JDBC")
-    Rel_R(orders_service, orders_db, "Reads from and writes to", "JDBC", $tags = "aggregate_root")
+    Rel_R(transaction_service, orders_db, "Reads from and writes to", "JDBC", $tags = "aggregate_root")
    }
 
 @enduml
